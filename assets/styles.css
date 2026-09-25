@@ -1170,6 +1170,7 @@ body.lang-ta .footer-col h4{ font-family:'Noto Sans Tamil',sans-serif; text-tran
   .donate-wrap{ grid-template-columns:1fr; }
   .media-grid{ grid-template-columns:1fr 1fr; }
   .trust-tabs-grid{ grid-template-columns:1fr; }
+  .trust-tabs-grid > div{ min-width:0; }
   .trustee-list{ grid-template-columns:1fr; }
   .connect-grid{ grid-template-columns:1fr; }
   .footer-top{ grid-template-columns:1fr 1fr; }
@@ -1256,8 +1257,12 @@ body.lang-ta .footer-col h4{ font-family:'Noto Sans Tamil',sans-serif; text-tran
 
   .trust-snapshot{ padding:26px 18px; }
   .ts-grid{ grid-template-columns:1fr; gap:20px; }
-  .trustee-role-tabs{ flex-wrap:nowrap; overflow-x:auto; padding-bottom:2px; }
-  .trustee-role-tab{ flex:none; }
+  .trustee-role-tabs{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .trustee-role-tab{ width:100%; min-width:0; padding-left:8px; padding-right:8px; white-space:normal; overflow-wrap:anywhere; }
+  .trustee-list{ min-width:0; }
+  .trustee-card{ min-width:0; }
+  .trustee-card > div:last-child{ min-width:0; }
+  .trustee-card .name{ overflow-wrap:anywhere; }
 
   .library-top{ padding:16px; }
   .library-top img{ height:180px; object-position:top center; }
@@ -1311,7 +1316,7 @@ body.lang-ta .footer-col h4{ font-family:'Noto Sans Tamil',sans-serif; text-tran
     box-shadow:0 -10px 26px -12px rgba(14,30,58,0.28);
     padding:8px 12px calc(8px + env(safe-area-inset-bottom));
   }
-  .mqs-inner{ display:flex; align-items:center; gap:10px; max-width:620px; margin:0 auto; }
+  .mqs-inner{ display:flex; align-items:center; gap:10px; max-width:620px; min-width:0; margin:0 auto; }
   .mqs-icon{
     flex:none; width:36px; height:36px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
