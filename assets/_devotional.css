@@ -1,0 +1,503 @@
+
+/* ==========================================================================
+   ABASS — DEVOTIONAL UPGRADE LAYER
+   Appended last so these rules win over the base sheet.
+   1. Sacred ornamentation & richer devotional styling
+   2. Mobile hero rebuilt around the Ayyappa darshan image
+   3. Fixed the broken circular "Temple Service" badge
+   4. Seva Sankalpam sponsor dropdown section
+   ========================================================================== */
+
+/* ---------- 1. TOKENS & SACRED TEXTURE ---------- */
+:root{
+  --gold-deep:#A8802C;
+  --gold-line:linear-gradient(90deg, transparent, var(--gold) 18%, var(--gold-soft) 50%, var(--gold) 82%, transparent);
+  --temple-glow:0 0 0 1px rgba(199,154,68,.28), 0 22px 48px -24px rgba(124,35,49,.38);
+}
+
+body{
+  background-color:var(--cream);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(217,139,58,.10), transparent 42%),
+    radial-gradient(circle at 88% 4%, rgba(124,35,49,.07), transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(199,154,68,.10), transparent 55%);
+  background-attachment:fixed;
+}
+
+/* soft kolam dot-grid behind alternating sections */
+.section-alt{ position:relative; }
+.section-alt::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background-image:radial-gradient(rgba(199,154,68,.22) 1px, transparent 1px);
+  background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent);
+          mask-image:linear-gradient(180deg, transparent, #000 25%, #000 75%, transparent);
+}
+.section-alt > .container{ position:relative; z-index:1; }
+
+/* ---------- ornamental gold divider under section headings ---------- */
+.section-head.center h2::after,
+.seva-sponsor .section-head h2::after{
+  content:""; display:block; width:132px; height:2px; margin:16px auto 0;
+  background:var(--gold-line); border-radius:2px;
+}
+.section-head.center h2{ position:relative; }
+
+/* small lamp flame that breathes beside eyebrows */
+.eyebrow .mark{ animation:abassFlicker 3.6s ease-in-out infinite; transform-origin:center; }
+@keyframes abassFlicker{
+  0%,100%{ opacity:.85; transform:scale(1); }
+  45%{ opacity:1; transform:scale(1.08); }
+}
+
+/* headings get a subtle warm gradient on the home page */
+.hero h1{
+  background:linear-gradient(120deg, var(--navy) 0%, var(--maroon) 46%, var(--gold-deep) 100%);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:var(--navy);
+}
+
+/* ---------- 2. SARANAM CHANT STRIP ---------- */
+.saranam-strip{
+  background:linear-gradient(100deg, var(--navy-deep) 0%, #17305A 48%, var(--maroon) 100%);
+  color:var(--gold-soft); overflow:hidden; position:relative;
+  border-top:1px solid rgba(228,200,136,.28); border-bottom:1px solid rgba(228,200,136,.28);
+}
+.saranam-track{
+  display:flex; gap:0; width:max-content;
+  animation:saranamScroll 38s linear infinite;
+}
+.saranam-track span{
+  font-family:'Cinzel', serif; font-size:13px; letter-spacing:.22em;
+  padding:11px 26px; white-space:nowrap; display:inline-flex; align-items:center; gap:26px;
+}
+.saranam-track span::after{ content:"❊"; color:var(--gold); font-size:11px; }
+@keyframes saranamScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.saranam-strip:hover .saranam-track{ animation-play-state:paused; }
+
+/* ---------- 3. HERO: BADGE FIX + DEVOTIONAL FRAME ---------- */
+
+/* The old badge was a fixed 104px circle holding a long sentence, so on phones
+   the text spilled out of the ring. It is now a self-sizing gold ribbon. */
+.hero-visual-badge{
+  position:absolute; z-index:12;
+  left:50%; right:auto; bottom:-20px; transform:translateX(-50%);
+  width:max-content; max-width:min(94%, 330px); height:auto;
+  border-radius:999px; padding:9px 20px;
+  background:linear-gradient(135deg, var(--paper) 0%, var(--cream-2) 100%);
+  border:1.5px solid var(--gold-soft);
+  box-shadow:0 14px 30px -12px rgba(14,30,58,.4), inset 0 1px 0 rgba(255,255,255,.7);
+  display:flex; align-items:center; justify-content:center; text-align:center;
+}
+.hero-visual-badge .lbl{
+  font-size:9.5px !important; font-weight:700; letter-spacing:.11em;
+  color:var(--maroon); text-transform:uppercase; margin:0 !important;
+  line-height:1.35; white-space:normal; overflow-wrap:anywhere;
+}
+body.lang-ta .hero-visual-badge .lbl{
+  text-transform:none; letter-spacing:.01em; font-size:11px !important;
+}
+
+/* arch-topped, garland-framed darshan panel */
+.hero-slideshow{
+  border:3px solid transparent;
+  background:
+    linear-gradient(var(--navy-deep), var(--navy-deep)) padding-box,
+    linear-gradient(150deg, var(--gold-soft), var(--gold) 40%, var(--maroon) 75%, var(--gold-soft)) border-box;
+  box-shadow:0 34px 64px -26px rgba(16,30,58,.55);
+}
+.hero-visual-ring{
+  background:
+    radial-gradient(circle at 20% 15%, rgba(217,139,58,.30), transparent 56%),
+    radial-gradient(circle at 85% 85%, rgba(124,35,49,.24), transparent 56%);
+  animation:abassHalo 7s ease-in-out infinite;
+}
+@keyframes abassHalo{
+  0%,100%{ opacity:.85; transform:scale(1); }
+  50%{ opacity:1; transform:scale(1.035); }
+}
+
+/* darshan caption that rides over the hero image (matches the heritage card) */
+.hero-darshan-cap{
+  position:absolute; left:0; right:0; bottom:0; z-index:8;
+  padding:34px 18px 48px;
+  background:linear-gradient(0deg, rgba(10,23,41,.93) 0%, rgba(10,23,41,.55) 52%, transparent 100%);
+  color:var(--cream); pointer-events:none;
+}
+.hero-darshan-cap .cap-om{
+  display:block; font-size:12px; letter-spacing:.28em; color:var(--gold-soft);
+  text-transform:uppercase; margin-bottom:6px; font-family:'Cinzel',serif;
+}
+.hero-darshan-cap .cap-title{
+  display:block; font-family:'Cinzel', serif; font-size:15px; line-height:1.45;
+  letter-spacing:.03em; text-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+body.lang-ta .hero-darshan-cap .cap-title,
+body.lang-ta .hero-darshan-cap .cap-om{ font-family:'Noto Serif Tamil',serif; letter-spacing:.01em; }
+
+/* keep the slideshow chrome above the caption gradient */
+.hero-slide-nav{ z-index:11; bottom:12px; right:12px; }
+
+/* ---------- 4. MOBILE HERO — CONTENT FIRST, DARSHAN IMAGE SECOND ---------- */
+@media (max-width: 980px){
+  .hero-grid{ gap:28px; }
+  /* content (title, tagline, lede, buttons) leads; the darshan image follows */
+  .hero-visual{ max-width:440px; width:100%; margin:0 auto 6px; }
+  .hero-slideshow{ aspect-ratio:4/4.1; max-height:none; border-radius:18px; }
+  .hero-slide img{ object-position:center 30%; }
+  .hero-visual-badge{ bottom:-18px; }
+}
+
+@media (max-width: 620px){
+  .hero{ padding:40px 0 56px; }
+  .hero-frame{ padding:22px 16px 30px; }
+
+  /* full-bleed-ish darshan card, no more 260px thumbnail */
+  .hero-visual{ max-width:100%; margin:0 auto 10px; }
+  .hero-slideshow{ aspect-ratio:4/4.4; max-height:none; border-width:2px; }
+  .hero-visual-ring{ inset:-14px; }
+
+  .hero-darshan-cap{ padding:28px 14px 40px; }
+  .hero-darshan-cap .cap-om{ font-size:10px; letter-spacing:.22em; }
+  .hero-darshan-cap .cap-title{ font-size:13.5px; }
+
+  /* badge sits centred beneath the frame and wraps cleanly */
+  .hero-visual-badge{
+    left:50%; bottom:-16px; transform:translateX(-50%);
+    max-width:min(96%, 300px); padding:8px 16px;
+  }
+  .hero-visual-badge .lbl{ font-size:8.8px !important; letter-spacing:.08em; }
+  body.lang-ta .hero-visual-badge .lbl{ font-size:10px !important; }
+
+  /* mobile logo + heading rhythm after the image */
+  .hero-logo{ width:68px; margin-bottom:14px; }
+  .hero h1{ font-size:clamp(34px,10vw,44px); }
+  .hero-foot{ gap:14px; }
+  .hero-foot .stat{ flex:1 1 40%; min-width:0; }
+  .hero-foot .stat .num{ font-size:14px !important; }
+  .hero-foot .stat .lbl{ font-size:10px; }
+
+  .heritage-photo figcaption{ font-size:12.5px; padding:16px 16px 14px; line-height:1.5; }
+}
+
+@media (max-width: 400px){
+  .hero-frame{ padding:18px 12px 26px; }
+  .hero-slideshow{ aspect-ratio:4/4.2; }
+  .hero-visual-badge .lbl{ font-size:8.2px !important; }
+}
+
+/* ---------- 5. SEVA SANKALPAM — SPONSOR DROPDOWN SECTION ---------- */
+.seva-sponsor{
+  position:relative; padding:80px 0;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(217,139,58,.16), transparent 45%),
+    linear-gradient(180deg, var(--paper) 0%, var(--cream) 100%);
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+}
+.seva-sponsor::after{
+  content:""; position:absolute; left:0; right:0; top:0; height:3px;
+  background:var(--gold-line);
+}
+
+.seva-panel{
+  margin-top:36px;
+  display:grid; grid-template-columns:0.85fr 1.15fr; gap:0;
+  background:var(--paper); border:1px solid var(--line); border-radius:20px;
+  overflow:hidden; box-shadow:var(--temple-glow);
+}
+
+/* left devotional visual */
+.seva-panel-media{ position:relative; min-height:100%; background:var(--navy-deep); }
+.seva-panel-media img{
+  width:100%; height:100%; object-fit:cover; object-position:center 22%;
+}
+.seva-panel-media .media-veil{
+  position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(10,23,41,.15) 0%, rgba(10,23,41,.82) 100%);
+}
+.seva-panel-media .media-copy{
+  position:absolute; left:0; right:0; bottom:0; padding:24px 22px; color:var(--cream);
+}
+.seva-panel-media .media-copy strong{
+  display:block; font-family:'Cinzel',serif; font-size:16px; letter-spacing:.04em;
+  color:var(--gold-soft); margin-bottom:6px;
+}
+.seva-panel-media .media-copy span{ font-size:12.5px; line-height:1.6; opacity:.9; }
+body.lang-ta .seva-panel-media .media-copy strong{ font-family:'Noto Serif Tamil',serif; }
+
+/* right form */
+.seva-panel-form{ padding:32px 34px 34px; }
+.seva-field{ margin-bottom:16px; }
+.seva-field > label{
+  display:block; font-size:11.5px; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--muted-2); margin-bottom:8px;
+}
+body.lang-ta .seva-field > label{ text-transform:none; letter-spacing:.02em; font-size:12.5px; }
+
+/* the dropdown itself */
+.seva-select-wrap{ position:relative; }
+.seva-select-wrap::after{
+  content:""; position:absolute; right:16px; top:50%; width:9px; height:9px;
+  border-right:2px solid var(--maroon); border-bottom:2px solid var(--maroon);
+  transform:translateY(-70%) rotate(45deg); pointer-events:none;
+}
+.seva-select{
+  width:100%; appearance:none; -webkit-appearance:none;
+  padding:15px 44px 15px 16px; border-radius:10px;
+  border:1.5px solid var(--line);
+  background:linear-gradient(135deg, #FFFDF8 0%, var(--cream) 100%);
+  color:var(--ink); font-family:inherit; font-size:14.5px; font-weight:600;
+  cursor:pointer; transition:border-color .2s ease, box-shadow .2s ease;
+}
+.seva-select:hover{ border-color:var(--gold); }
+.seva-select:focus{
+  outline:none; border-color:var(--maroon);
+  box-shadow:0 0 0 3px rgba(124,35,49,.14);
+}
+.seva-select optgroup{ font-family:inherit; font-style:normal; font-weight:700; color:var(--maroon); }
+
+/* live detail card driven by the dropdown */
+.seva-detail{
+  border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px;
+  background:linear-gradient(140deg, var(--cream) 0%, #FFFCF6 100%);
+  margin-bottom:18px; animation:sevaFade .35s ease;
+}
+@keyframes sevaFade{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
+.seva-detail-top{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; margin-bottom:8px;
+}
+.seva-detail-name{
+  font-family:'Cinzel',serif; font-size:16.5px; font-weight:700; color:var(--navy); line-height:1.3;
+}
+body.lang-ta .seva-detail-name{ font-family:'Noto Serif Tamil',serif; }
+.seva-detail-amt{
+  font-family:'Cinzel',serif; font-size:16px; font-weight:700; color:var(--maroon);
+  background:var(--paper); border:1px solid var(--gold-soft); border-radius:999px;
+  padding:4px 14px; white-space:nowrap;
+}
+.seva-detail-desc{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+.seva-detail-perks{ margin-top:10px; display:grid; gap:6px; }
+.seva-detail-perks li{
+  font-size:12.5px; color:var(--ink); padding-left:22px; position:relative; line-height:1.5;
+}
+.seva-detail-perks li::before{
+  content:"✦"; position:absolute; left:0; top:-1px; color:var(--gold); font-size:12px;
+}
+
+/* quick amount chips */
+.seva-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.seva-chip{
+  padding:9px 16px; border-radius:999px; border:1.5px solid var(--line);
+  background:var(--paper); color:var(--ink); font-size:13px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all .2s ease;
+}
+.seva-chip:hover{ border-color:var(--gold); transform:translateY(-1px); }
+.seva-chip.active{
+  background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+  border-color:var(--gold-deep); color:var(--navy-deep);
+  box-shadow:0 8px 18px -8px rgba(199,154,68,.7);
+}
+.seva-custom-amt{ margin-top:10px; }
+
+.seva-panel-form input[type="text"],
+.seva-panel-form input[type="tel"],
+.seva-panel-form input[type="number"]{
+  width:100%; padding:13px 15px; border-radius:10px; border:1.5px solid var(--line);
+  background:#FFFDF8; color:var(--ink); font-family:inherit; font-size:14px;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.seva-panel-form input:focus{
+  outline:none; border-color:var(--maroon); box-shadow:0 0 0 3px rgba(124,35,49,.12);
+}
+.seva-two{ display:flex; gap:12px; }
+.seva-two > *{ flex:1; min-width:0; }
+
+.seva-submit{
+  width:100%; margin-top:6px; padding:16px 24px; border-radius:12px;
+  font-size:15px; letter-spacing:.04em; justify-content:center;
+}
+.seva-note{
+  margin-top:12px; font-size:11.5px; color:var(--muted); line-height:1.6; text-align:center;
+}
+
+/* ---------- 6. GENERAL DEVOTIONAL POLISH ---------- */
+.heritage-photo{ border:2px solid var(--gold-soft); }
+.heritage-photo figcaption{ font-size:15px; }
+
+.highlight-slide-img{ border-radius:12px 12px 0 0; overflow:hidden; }
+.highlight-slide{ transition:transform .3s ease; }
+
+.btn-primary, .btn-gold{ position:relative; }
+
+/* gentle lift on interactive cards */
+.sponsor-card, .connect-card, .obj-card, .media-card{
+  transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+.sponsor-card:hover, .connect-card:hover{
+  transform:translateY(-4px); border-color:var(--gold); box-shadow:var(--temple-glow);
+}
+
+/* the fixed bottom sponsor bar, dressed up */
+@media (max-width: 760px){
+  .mobile-quick-sponsor{
+    background:linear-gradient(135deg, var(--paper) 0%, var(--cream-2) 100%);
+    border-top:2px solid var(--gold-soft);
+  }
+  .mqs-select{ font-weight:600; border-color:var(--gold-soft); }
+}
+
+/* ---------- 7. SEVA SECTION RESPONSIVE ---------- */
+@media (max-width: 980px){
+  .seva-panel{ grid-template-columns:1fr; }
+  /* content (form) leads on mobile; the devotional photo follows */
+  .seva-panel-form{ order:-1; }
+  .seva-panel-media{ min-height:300px; max-height:340px; }
+  .seva-panel-media img{ object-position:center 42%; }
+}
+@media (max-width: 620px){
+  .seva-sponsor{ padding:56px 0; }
+  .seva-panel{ margin-top:26px; border-radius:16px; }
+  .seva-panel-media{ min-height:260px; max-height:290px; }
+  .seva-panel-media .media-copy{ padding:18px 16px; }
+  .seva-panel-form{ padding:24px 18px 26px; }
+  .seva-select{ font-size:14px; padding:14px 40px 14px 14px; }
+  .seva-detail-top{ gap:8px; }
+  .seva-detail-name{ font-size:15px; }
+  .seva-detail-amt{ font-size:14px; padding:3px 12px; }
+  .seva-two{ flex-direction:column; gap:12px; }
+  .saranam-track span{ font-size:11.5px; letter-spacing:.16em; padding:9px 18px; }
+}
+@media (max-width: 400px){
+  .seva-panel-form{ padding:20px 14px 22px; }
+  .seva-chip{ padding:8px 13px; font-size:12px; }
+}
+
+
+/* ---------- 8. FINAL ALIGNMENT FIXES ---------- */
+
+/* anchored sections must clear the sticky header */
+section[id]{ scroll-margin-top:92px; }
+
+/* centre the crest and eyebrow once the hero stacks */
+@media (max-width: 980px){
+  .hero-logo{ margin-left:auto; margin-right:auto; }
+  /* stacking the flame above the trust name keeps it centred when the text wraps */
+  .hero .eyebrow{ flex-direction:column; gap:8px; align-items:center; width:100%; }
+  .hero .eyebrow span{ text-align:center; display:block; }
+  .hero .eyebrow .mark{ width:20px; height:20px; }
+  .section-head.center .eyebrow{ flex-direction:column; gap:7px; align-items:center; }
+  .hero{ padding:28px 0 52px; }
+}
+
+/* the native select must never clip its own label */
+.seva-select{ text-overflow:ellipsis; white-space:nowrap; overflow:hidden; }
+@media (max-width: 620px){
+  .seva-select{ font-size:13.5px; padding:14px 38px 14px 13px; }
+  .seva-select-wrap::after{ right:14px; }
+}
+@media (max-width: 400px){
+  .seva-select{ font-size:12.8px; }
+}
+
+/* keep the fixed donate bar from hiding the last form control */
+@media (max-width: 760px){
+  .seva-sponsor{ padding-bottom:72px; }
+}
+
+
+/* ---------- 9. NARROW-PHONE OVERFLOW GUARDS (<=400px) ---------- */
+/* Inputs carry a default intrinsic width that can push a grid track wider than
+   the screen, so every form child is told it may shrink. */
+.contribution-grid, .contribution-grid > *,
+.donate-wrap, .donate-wrap > *,
+.connect-grid, .connect-grid > *,
+.seva-panel, .seva-panel > *{ min-width:0; }
+
+.contribution-form-wrap input,
+.contribution-form-wrap select,
+.contribution-form-wrap textarea,
+.connect-card input,
+.seva-panel-form input,
+.seva-panel-form select{ min-width:0; max-width:100%; width:100%; }
+
+.form-row, .form-row > *{ min-width:0; }
+.qr-placeholder{ max-width:100%; }
+
+/* the chant marquee must never contribute to page width */
+.saranam-strip{ max-width:100vw; overflow:hidden; }
+
+@media (max-width: 480px){
+  .contribution-form-wrap{ padding:20px 16px; }
+  .contribution-grid{ gap:24px; }
+}
+
+
+/* ---------- 10. SELECT MIN-CONTENT OVERFLOW FIX ---------- */
+/* A <select> reports a min-content width equal to its widest <option>, which on
+   the events contribution form was 619px and forced the grid track wider than a
+   360px screen. Every select on the site is told it may shrink and ellipsise. */
+select{
+  min-width:0; max-width:100%; width:100%;
+  text-overflow:ellipsis; white-space:nowrap; overflow:hidden;
+}
+form, form *{ min-width:0; }
+.mqs-select{ width:auto; }
+
+
+/* ---------- 11. SEVA PANEL IMAGE — KEEP THE DEITY CLEAR OF THE COPY ---------- */
+/* gallery-6 is 4:3 with the murti low in the frame. Once the panel goes
+   full-width the overlay caption landed directly on the deity's face, so on
+   tablet and phone the caption moves to the top of the image instead. */
+@media (max-width: 980px){
+  .seva-panel-media .media-copy{
+    top:0; bottom:auto; padding:18px 22px 30px;
+  }
+  .seva-panel-media .media-veil{
+    background:linear-gradient(180deg, rgba(10,23,41,.88) 0%, rgba(10,23,41,.45) 42%, rgba(10,23,41,.12) 100%);
+  }
+}
+@media (max-width: 620px){
+  /* the section lede already carries this detail — keep only the headline */
+  .seva-panel-media .media-copy span{ display:none; }
+  .seva-panel-media .media-copy{ padding:16px 16px 26px; }
+  .seva-panel-media .media-copy strong{ margin-bottom:0; font-size:15px; }
+  .seva-panel-media{ min-height:230px; max-height:250px; }
+
+  /* tighten the gap between the heading block and the panel */
+  .seva-sponsor .section-head{ margin-bottom:0; }
+  .seva-panel{ margin-top:22px; }
+  .seva-sponsor .section-head .lede{ margin-bottom:0; }
+}
+
+
+/* ===== Objects of the Trust — deed clauses (Sept 2026 review) ===== */
+.obj-card.open .obj-body{ max-height:4000px; }
+.obj-summary{ padding:16px 24px 0; font-size:14px; font-style:italic; color:var(--muted); }
+.obj-list.deed{ padding:14px 24px 24px; }
+.obj-list.deed li{ padding-left:46px; }
+.obj-list.deed li.wide{ padding-left:82px; }
+.obj-list.deed li::before{ content:attr(data-l); left:0; top:1px; font-family:'Cinzel',serif; font-size:12.5px; font-weight:600; color:var(--maroon); }
+.obj-more{ font-weight:600; color:var(--maroon); text-decoration:none; font-size:14px; }
+.obj-more:hover{ text-decoration:underline; }
+@media (max-width:620px){
+  .obj-summary{ padding:14px 18px 0; }
+  .obj-list.deed{ padding:12px 18px 18px; }
+}
+
+/* Longer header name: keep it compact so the nav does not squeeze */
+.brand-text .sub{ max-width:150px; letter-spacing:0.05em; font-size:10px; line-height:1.25; }
+
+/* ===== Objects page — Trust Deed layout ===== */
+.deed-doc{ max-width:860px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:12px; padding:38px 44px; box-shadow:0 10px 30px -18px rgba(14,30,58,.25); font-family:Cambria,'Times New Roman',Georgia,serif; color:#1a1a1a; }
+.deed-h{ font-family:Cambria,'Times New Roman',Georgia,serif; font-size:19px; font-weight:700; color:var(--navy); margin:0 0 14px; letter-spacing:.01em; }
+.deed-intro{ font-size:17px; margin:0 0 14px; }
+.deed-clause{ font-size:17px; line-height:1.55; margin:0 0 12px; padding-left:2.8em; text-indent:-2.8em; text-align:justify; }
+.deed-l{ display:inline-block; width:2.8em; text-indent:0; }
+.deed-glance{ max-width:860px; margin:34px auto 0; }
+.deed-glance-h{ font-family:'Cinzel',serif; font-size:15px; color:var(--maroon); margin-bottom:14px; text-align:center; }
+.deed-cats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; }
+.deed-cat{ border:1px solid var(--line); background:var(--cream); border-radius:10px; padding:12px 16px; }
+.deed-cat h4{ font-size:14.5px; color:var(--navy); margin-bottom:6px; }
+.deed-cat-l{ font-size:12.5px; color:var(--muted); line-height:1.6; }
+@media (max-width:620px){ .deed-doc{ padding:24px 18px; } .deed-clause,.deed-intro{ font-size:15.5px; } }
