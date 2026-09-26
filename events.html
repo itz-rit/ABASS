@@ -198,6 +198,7 @@
           <li><a href="transparency.html" data-en="Board of Trustees" data-ta="அறங்காவலர் குழு">Board of Trustees</a></li>
           <li><a href="transparency.html" data-en="Annual Reports" data-ta="ஆண்டு அறிக்கைகள்">Annual Reports</a></li>
           <li><a href="transparency.html" data-en="Compliance Updates" data-ta="இணக்க புதுப்பிப்புகள்">Compliance Updates</a></li>
+          <li><a href="admin.html" data-en="Admin Portal" data-ta="நிர்வாக போர்டல்" style="opacity:0.75;">Admin Portal</a></li>
         </ul>
       </div>
     </div>
@@ -231,5 +232,97 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 <script src="assets/script.js"></script>
-<script src="assets/_devotional.js"></script></body></html>
+<script src="assets/_devotional.js"></script>
+<script>
+(async function() {
+  if (!window.ABASS_API) return;
+  var res = await window.ABASS_API.getEvents({ upcomingOnly: true });
+  var events = res.data || [];
+  var grid = document.querySelector('.event-cards-grid');
+  var formSelect = document.querySelector('select[name="event"]');
+
+  if (grid && events.length > 0) {
+    grid.innerHTML = '';
+    events.forEach(function(e) {
+      var dateBadgeDay = '';
+      var dateBadgeMonth = '';
+
+      if (e.is_recurring) {
+        dateBadgeDay = '2nd Sat';
+        dateBadgeMonth = 'Every Month';
+      } else if (e.date_display_en) {
+        var parts = e.date_display_en.split(' ');
+        if (parts.length >= 2) {
+          dateBadgeDay = parts[0];
+          dateBadgeMonth = parts.slice(1).join(' ');
+        } else {
+          dateBadgeDay = e.date_display_en;
+          dateBadgeMonth = '';
+        }
+      } else if (e.start_date) {
+        var d = new Date(e.start_date);
+        dateBadgeDay = d.getDate();
+        dateBadgeMonth = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+      }
+
+      var dayTa = (e.is_recurring) ? '2வது சனி' : (e.date_display_ta ? e.date_display_ta.split(' ')[0] : dateBadgeDay);
+      var monthTa = (e.is_recurring) ? 'ஒவ்வொரு மாதமும்' : (e.date_display_ta ? e.date_display_ta.split(' ').slice(1).join(' ') : dateBadgeMonth);
+
+      var card = document.createElement('div');
+      card.className = 'event-card';
+      if (e.end_date || e.start_date) {
+        card.setAttribute('data-until', e.end_date || e.start_date);
+      }
+
+      var locHtml = '';
+      if (e.location_en) {
+        locHtml = '<div class="event-location">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>' +
+          '<span data-en="' + (e.location_en || '') + '" data-ta="' + (e.location_ta || e.location_en || '') + '">' + (e.location_en || '') + '</span>' +
+        '</div>';
+      }
+
+      card.innerHTML = 
+        '<div class="event-date-badge">' +
+          '<span class="day" data-en="' + dateBadgeDay + '" data-ta="' + dayTa + '">' + dateBadgeDay + '</span>' +
+          '<span class="month" data-en="' + dateBadgeMonth + '" data-ta="' + monthTa + '">' + dateBadgeMonth + '</span>' +
+        '</div>' +
+        '<div class="event-body">' +
+          '<h3 data-en="' + (e.title_en || '') + '" data-ta="' + (e.title_ta || e.title_en || '') + '">' + (e.title_en || '') + '</h3>' +
+          locHtml +
+          '<p class="event-desc" data-en="' + (e.description_en || '') + '" data-ta="' + (e.description_ta || e.description_en || '') + '">' + (e.description_en || '') + '</p>' +
+        '</div>';
+
+      grid.appendChild(card);
+    });
+  }
+
+  // Populate contribution form select dropdown
+  if (formSelect && events.length > 0) {
+    formSelect.innerHTML = '<option value="" disabled selected data-en="Select Event" data-ta="நிகழ்வைத் தேர்ந்தெடுக்கவும்">Select Event</option>';
+    events.forEach(function(e) {
+      var opt = document.createElement('option');
+      var labelEn = e.title_en + (e.date_display_en ? ' (' + e.date_display_en + ')' : '');
+      var labelTa = (e.title_ta || e.title_en) + (e.date_display_ta ? ' (' + e.date_display_ta + ')' : '');
+      opt.value = labelEn;
+      opt.setAttribute('data-en', labelEn);
+      opt.setAttribute('data-ta', labelTa);
+      if (e.end_date || e.start_date) {
+        opt.setAttribute('data-until', e.end_date || e.start_date);
+      }
+      opt.textContent = labelEn;
+      formSelect.appendChild(opt);
+    });
+  }
+
+  // Re-apply language switch
+  if (window.applyLang && window.currentLang) {
+    window.applyLang(window.currentLang, true);
+  }
+})();
+</script>
+</body></html>

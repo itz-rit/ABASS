@@ -1384,6 +1384,8 @@ a:focus-visible, button:focus-visible, input:focus-visible{
 .event-date-badge .month{ font-size:12px; letter-spacing:0.06em; text-transform:uppercase; opacity:0.9; }
 .event-body{ padding:20px; display:flex; flex-direction:column; gap:10px; }
 .event-body h3{ font-size:17px; color:var(--navy); line-height:1.35; }
+.event-body .event-location{ font-size:12px; font-weight:600; color:var(--maroon); display:inline-flex; align-items:center; gap:5px; margin-top:-4px; }
+.event-body .event-location svg{ width:13px; height:13px; flex:none; }
 .event-body .event-desc{ font-size:13.5px; color:var(--muted); line-height:1.55; }
 
 /* ============ CONTRIBUTION SECTION ============ */

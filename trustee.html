@@ -88,21 +88,21 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16 7.5 13 12 13 C16.5 13 20 16 20 21"/></svg>
           <div class="txt">
             <h4 data-en="Family Members" data-ta="குடும்ப உறுப்பினர்கள்">Family Members</h4>
-            <small data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
+            <small id="trustee-family" data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
           </div>
         </div>
         <div class="doc-row">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2 L14 8 L20 8 L15 12 L17 18 L12 14 L7 18 L9 12 L4 8 L10 8 Z"/></svg>
           <div class="txt">
             <h4 data-en="Gothram &amp; Star" data-ta="கோத்திரம் &amp; நட்சத்திரம்">Gothram &amp; Star</h4>
-            <small data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
+            <small id="trustee-gothram-star" data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
           </div>
         </div>
         <div class="doc-row">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><path d="M12 7 L12 12 L16 14"/></svg>
           <div class="txt">
             <h4 data-en="Rasi" data-ta="ராசி">Rasi</h4>
-            <small data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
+            <small id="trustee-rasi" data-en="To be added by ABASS admin" data-ta="ABASS நிர்வாகியால் சேர்க்கப்படும்">To be added by ABASS admin</small>
           </div>
         </div>
       </div>
@@ -148,6 +148,7 @@
           <li><a href="transparency.html" data-en="Board of Trustees" data-ta="அறங்காவலர் குழு">Board of Trustees</a></li>
           <li><a href="transparency.html" data-en="Annual Reports" data-ta="ஆண்டு அறிக்கைகள்">Annual Reports</a></li>
           <li><a href="transparency.html" data-en="Compliance Updates" data-ta="இணக்க புதுப்பிப்புகள்">Compliance Updates</a></li>
+          <li><a href="admin.html" style="color:var(--gold); font-weight:600;" data-en="Admin Portal" data-ta="நிர்வாக போர்டல்">Admin Portal</a></li>
         </ul>
       </div>
     </div>
@@ -163,22 +164,69 @@
 </footer>
 
 <script src="assets/trustees-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 <script>
-(function(){
+(async function(){
   var params = new URLSearchParams(location.search);
   var id = params.get('id');
-  var data = window.ABASS_TRUSTEES || [];
-  var member = data.filter(function(m){ return m.id === id; })[0];
   var nameEl = document.getElementById('trustee-name');
   var roleEl = document.getElementById('trustee-role');
   var avatarEl = document.getElementById('trustee-avatar');
   var groupEl = document.getElementById('trustee-group');
+  var famEl = document.getElementById('trustee-family');
+  var gothEl = document.getElementById('trustee-gothram-star');
+  var rasiEl = document.getElementById('trustee-rasi');
+
+  var res = await window.ABASS_API.getMemberById(id);
+  var member = res && res.data;
+
   if(member){
-    nameEl.textContent = member.name;
-    roleEl.textContent = member.role;
-    avatarEl.textContent = member.initials;
-    groupEl.textContent = member.group === 'apex' ? 'Apex Committee' : 'Present Committee';
-    document.title = member.name + ' — ABASS';
+    var nameEn = member.name_en || member.name || '';
+    var nameTa = member.name_ta || nameEn;
+    var roleEn = member.role_en || member.role || '';
+    var roleTa = member.role_ta || roleEn;
+    var groupName = (member.group === 'apex' || member.group_type === 'apex') ? 'Apex Committee' : 'Present Committee';
+    var groupNameTa = (member.group === 'apex' || member.group_type === 'apex') ? 'உச்ச குழு' : 'தற்போதைய குழு';
+    var curLang = document.documentElement.lang || 'en';
+
+    nameEl.setAttribute('data-en', nameEn);
+    nameEl.setAttribute('data-ta', nameTa);
+    nameEl.textContent = (curLang === 'ta') ? nameTa : nameEn;
+
+    roleEl.setAttribute('data-en', roleEn);
+    roleEl.setAttribute('data-ta', roleTa);
+    roleEl.textContent = (curLang === 'ta') ? roleTa : roleEn;
+
+    avatarEl.textContent = member.initials || (nameEn.split(' ').map(function(s){return s[0];}).join('').slice(0,3).toUpperCase());
+
+    groupEl.setAttribute('data-en', groupName);
+    groupEl.setAttribute('data-ta', groupNameTa);
+    groupEl.textContent = (curLang === 'ta') ? groupNameTa : groupName;
+
+    if (member.family_members && famEl) {
+      famEl.textContent = member.family_members;
+      famEl.removeAttribute('data-en');
+      famEl.removeAttribute('data-ta');
+    }
+    if ((member.gothram || member.nakshatram_star) && gothEl) {
+      var str = [member.gothram ? ('Gothram: ' + member.gothram) : '', member.nakshatram_star ? ('Star: ' + member.nakshatram_star) : ''].filter(Boolean).join(' • ');
+      gothEl.textContent = str;
+      gothEl.removeAttribute('data-en');
+      gothEl.removeAttribute('data-ta');
+    }
+    if (member.rasi && rasiEl) {
+      rasiEl.textContent = member.rasi;
+      rasiEl.removeAttribute('data-en');
+      rasiEl.removeAttribute('data-ta');
+    }
+
+    document.title = nameEn + ' — ABASS';
+
+    if (typeof window.applyLanguage === 'function') {
+      window.applyLanguage(curLang);
+    }
   } else {
     nameEl.textContent = 'Member not found';
     roleEl.textContent = '';

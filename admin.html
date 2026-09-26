@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Abhath Bhanthavan Ayyappa Seva Sangham</title>
+  <link rel="icon" href="assets/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/admin.css">
+</head>
+<body>
+
+  <!-- ==================== AUTH VIEW (LOGIN) ==================== -->
+  <div id="authView" class="auth-wrapper" style="display:flex;">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img src="assets/logo-en.png" alt="ABASS Emblem">
+        <h1>ABASS Admin Portal</h1>
+        <p>Abhath Bhanthavan Ayyappa Seva Sangham</p>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="loginEmail">Admin Email</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="admin@abasspvm.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label for="loginPassword">Password</label>
+            <a href="#" id="forgotPasswordLink" style="font-size:12px; color:var(--admin-gold); text-decoration:none; font-weight:600;">Forgot Password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width:100%; margin-top:8px;">
+          Sign In to Admin Panel
+        </button>
+      </form>
+
+      <div class="auth-notice">
+        <strong>Strictly Protected:</strong> Only authorized ABASS Trust administrators may access this portal. Access is enforced by Supabase Row Level Security.
+      </div>
+      <div id="authConfigNotice" class="auth-notice" style="display:none; background:#fee2e2; border-color:#fca5a5; color:#991b1b; margin-top:10px;"></div>
+
+      <p style="margin-top:20px; font-size:13px; color:var(--admin-muted);">
+        <a href="index.html" style="color:var(--admin-navy); font-weight:600;">&larr; Back to Public Website</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== RESET PASSWORD VIEW ==================== -->
+  <div id="resetPasswordView" class="auth-wrapper" style="display:none;">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img src="assets/logo-en.png" alt="ABASS Emblem">
+        <h1>Set New Password</h1>
+        <p>Enter and confirm your new administrator password</p>
+      </div>
+
+      <form id="resetPasswordForm" class="auth-form">
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" class="form-control" placeholder="••••••••••••" required minlength="6" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="confirmNewPassword">Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" class="form-control" placeholder="••••••••••••" required minlength="6" autocomplete="new-password">
+        </div>
+        <div id="resetPasswordError" class="auth-notice" style="display:none; background:#fee2e2; border-color:#fca5a5; color:#991b1b;"></div>
+        <button type="submit" id="resetPasswordSubmitBtn" class="btn btn-primary" style="width:100%; margin-top:8px;">
+          Update Password
+        </button>
+      </form>
+
+      <div id="resetPasswordSuccess" style="display:none; margin-top:16px;">
+        <div class="auth-notice" style="background:#e8f7ee; border-color:#86efac; color:#166534; margin-bottom:16px;">
+          ✓ Password updated successfully! You can now sign in with your new password.
+        </div>
+        <button type="button" id="returnToLoginBtn" class="btn btn-primary" style="width:100%;">
+          Return to Admin Login
+        </button>
+      </div>
+
+      <p style="margin-top:20px; font-size:13px; color:var(--admin-muted);">
+        <a href="#" id="cancelResetBtn" style="color:var(--admin-navy); font-weight:600;">&larr; Back to Admin Login</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ==================== ACCESS DENIED VIEW ==================== -->
+  <div id="accessDeniedView" class="auth-wrapper" style="display:none;">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--admin-red-bg); color:var(--admin-red); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:32px;height:32px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h1 style="color:var(--admin-red);">Access Denied</h1>
+        <p style="margin-top:8px; line-height:1.5;">You are authenticated as <strong id="deniedUserEmail"></strong>, but this account is not registered in the <code>admin_users</code> authorization table.</p>
+      </div>
+      <p style="font-size:13px; color:var(--admin-muted); margin-bottom:20px;">
+        To grant admin privileges, add this user's UID to the <code>admin_users</code> table in your Supabase SQL editor.
+      </p>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button type="button" id="deniedLogoutBtn" class="btn btn-primary">Sign Out</button>
+        <a href="index.html" class="btn btn-outline">Go to Website</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN ADMIN DASHBOARD SHELL ==================== -->
+  <div id="adminShell" class="admin-shell" style="display:none;">
+    <!-- Header -->
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div class="admin-brand">
+          <img src="assets/logo-en.png" alt="ABASS Logo">
+          <div class="admin-brand-info">
+            <div class="title">ABASS Admin Portal</div>
+            <div class="subtitle">Unified Backend &amp; Data Control</div>
+          </div>
+        </div>
+        <div class="admin-header-actions">
+          <a href="index.html" target="_blank" class="btn btn-outline btn-sm" style="color:#fff; border-color:rgba(255,255,255,0.25);">
+            <span>View Website</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+          <div class="admin-user-pill">
+            <span class="dot"></span>
+            <span id="adminUserEmail">admin</span>
+          </div>
+          <button type="button" id="logoutBtn" class="btn btn-gold btn-sm">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="admin-nav-bar" aria-label="Admin Navigation">
+      <div class="admin-nav-inner">
+        <button type="button" class="admin-tab-btn active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-tab="events">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Events</span>
+          <span id="badgeEventsCount" class="badge-count">0</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-tab="gallery">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Gallery</span>
+          <span id="badgeGalleryCount" class="badge-count">0</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-tab="trustees">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Trustees &amp; Committee</span>
+          <span id="badgeTrusteesCount" class="badge-count">0</span>
+        </button>
+        <button type="button" class="admin-tab-btn" data-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Supabase Config</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+
+      <!-- ==================== TAB 1: DASHBOARD ==================== -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="admin-section-head">
+          <div>
+            <h2>Trust Overview</h2>
+            <p>Welcome to the ABASS management console. Data saved here updates the public website live.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="stat-info">
+              <div id="statEventsCount" class="num">0</div>
+              <div class="lbl">Active Upcoming Events</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e8f4fc; color:#0369a1;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div class="stat-info">
+              <div id="statGalleryCount" class="num">0</div>
+              <div class="lbl">Published Gallery Photos</div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7; color:#b45309;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <div id="statTrusteesCount" class="num">0</div>
+              <div class="lbl">Registered Trustees &amp; Members</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-card" style="padding:28px;">
+          <h3 style="font-size:18px; margin-bottom:12px;">Architecture Status: Single Source of Truth</h3>
+          <p style="color:var(--admin-muted); font-size:14px; line-height:1.6; max-width:85ch;">
+            This Admin Panel is directly wired to your Supabase PostgreSQL database and Storage.
+            Any event added, modified, or deleted here will immediately reflect across <strong>events.html</strong>, the <strong>Seva Sankalpam sponsor dropdowns</strong> on index.html and donations.html, and the <strong>Mobile Quick Sponsor bar</strong>.
+            New photos uploaded here to the <code>gallery</code> bucket will appear instantly on <strong>media.html</strong> with full interactive lightbox support.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: EVENTS ==================== -->
+      <section id="view-events" class="view-section">
+        <div class="admin-section-head">
+          <div>
+            <h2>Events &amp; Pooja Management</h2>
+            <p>Manage scheduled poojas, annual festivals, and recurring community Annadhaanam.</p>
+          </div>
+          <button type="button" id="addEventBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>+ Add Event</span>
+          </button>
+        </div>
+
+        <div class="data-card">
+          <div class="data-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Event Title</th>
+                  <th>Date / Schedule</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Order</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:32px;">Loading events from Supabase...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: GALLERY ==================== -->
+      <section id="view-gallery" class="view-section">
+        <div class="admin-section-head">
+          <div>
+            <h2>Media Gallery Management</h2>
+            <p>Upload new event photos directly to Supabase Storage bucket <code>gallery</code>.</p>
+          </div>
+          <button type="button" id="addGalleryBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>+ Add Image</span>
+          </button>
+        </div>
+
+        <div id="galleryAdminGrid" class="gallery-admin-grid">
+          <div style="grid-column:1/-1; text-align:center; padding:32px;">Loading gallery items from Supabase...</div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: TRUSTEES ==================== -->
+      <section id="view-trustees" class="view-section">
+        <div class="admin-section-head">
+          <div>
+            <h2>Board of Trustees &amp; Committee</h2>
+            <p>Manage all 54 Apex &amp; Present Committee members and maintain family/gothram/rasi profiles.</p>
+          </div>
+          <button type="button" id="addMemberBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>+ Add Member</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap;">
+          <div style="display:flex; gap:6px;">
+            <button type="button" id="memberFilterAll" class="btn btn-outline btn-sm active">All Members</button>
+            <button type="button" id="memberFilterApex" class="btn btn-outline btn-sm">Apex Committee</button>
+            <button type="button" id="memberFilterPresent" class="btn btn-outline btn-sm">Present Committee</button>
+          </div>
+          <div style="max-width:300px; width:100%;">
+            <input type="text" id="memberSearch" class="form-control" placeholder="Search by name or role...">
+          </div>
+        </div>
+
+        <div class="data-card">
+          <div class="data-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Member Name</th>
+                  <th>Designation / Role</th>
+                  <th>Committee Group</th>
+                  <th>Status</th>
+                  <th>Gothram / Rasi</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="trusteesTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:32px;">Loading members from Supabase...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: SETTINGS ==================== -->
+      <section id="view-settings" class="view-section">
+        <div class="admin-section-head">
+          <div>
+            <h2>Supabase Connection &amp; Environment</h2>
+            <p>Configure project keys for your local browser or deployment environment.</p>
+          </div>
+        </div>
+
+        <div class="data-card" style="max-width:680px; padding:28px;">
+          <form id="settingsForm" style="display:flex; flex-direction:column; gap:18px;">
+            <div class="form-group">
+              <label for="settingsUrl">Supabase Project URL</label>
+              <input type="text" id="settingsUrl" class="form-control" placeholder="https://YOUR_PROJECT_ID.supabase.co" required>
+            </div>
+            <div class="form-group">
+              <label for="settingsKey">Supabase Public Anon Key</label>
+              <input type="password" id="settingsKey" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+              <small style="color:var(--admin-muted); font-size:11.5px; margin-top:4px;">NEVER place your <code>service_role</code> secret key here. Only use the <code>anon</code> public key.</small>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; margin-top:8px;">
+              <button type="submit" class="btn btn-primary">Save to Browser</button>
+              <button type="button" id="testConnBtn" class="btn btn-outline">Test Connection</button>
+            </div>
+            <div id="testConnStatus" style="font-size:13px; font-weight:600; margin-top:4px;"></div>
+          </form>
+
+          <hr style="border:none; border-top:1px solid var(--admin-line); margin:28px 0;">
+
+          <h4 style="font-size:15px; margin-bottom:8px;">Vercel Deployment Setup</h4>
+          <p style="font-size:13px; color:var(--admin-muted); line-height:1.5;">
+            To permanently set these values for all users on Vercel without requiring browser configuration, edit <code>assets/supabase-config.js</code> and paste your <code>url</code> and <code>anonKey</code>.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT EVENT ==================== -->
+  <div id="eventModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="eventModalTitle">Add New Event</h3>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+      <form id="eventForm">
+        <input type="hidden" id="eventId">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="eventTitleEn">Title (English) *</label>
+              <input type="text" id="eventTitleEn" class="form-control" placeholder="e.g. Yearly Padi Pooja" required>
+            </div>
+            <div class="form-group">
+              <label for="eventTitleTa">Title (Tamil)</label>
+              <input type="text" id="eventTitleTa" class="form-control" placeholder="e.g. ஆண்டு படி பூஜை">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="eventSlug">URL Identifier / Slug <span class="hint">(optional, auto-generated)</span></label>
+            <input type="text" id="eventSlug" class="form-control" placeholder="e.g. yearly-padi-pooja">
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="eventIsRecurring" style="width:16px;height:16px;">
+              <span>This is a recurring event (e.g. Monthly Annadhaanam)</span>
+            </label>
+          </div>
+
+          <!-- Recurring rule field -->
+          <div id="recurrenceGroup" class="form-group" style="display:none;">
+            <label for="eventRecurrenceRule">Recurrence Schedule</label>
+            <input type="text" id="eventRecurrenceRule" class="form-control" placeholder="e.g. Every 2nd Saturday">
+          </div>
+
+          <!-- Fixed dates fields -->
+          <div id="fixedDateGroup" class="form-grid-2">
+            <div class="form-group">
+              <label for="eventStartDate">Start Date</label>
+              <input type="date" id="eventStartDate" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="eventEndDate">End Date <span class="hint">(if multi-day)</span></label>
+              <input type="date" id="eventEndDate" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="eventDateDisplayEn">Display Date (EN) <span class="hint">(Badge text)</span></label>
+              <input type="text" id="eventDateDisplayEn" class="form-control" placeholder="e.g. 12 Dec 2026 or 27–30 Oct 2026">
+            </div>
+            <div class="form-group">
+              <label for="eventDateDisplayTa">Display Date (TA)</label>
+              <input type="text" id="eventDateDisplayTa" class="form-control" placeholder="e.g. 12 டிச 2026">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="eventLocationEn">Location (English) *</label>
+              <input type="text" id="eventLocationEn" class="form-control" placeholder="e.g. Zamin Pallavaram, Chennai">
+            </div>
+            <div class="form-group">
+              <label for="eventLocationTa">Location (Tamil)</label>
+              <input type="text" id="eventLocationTa" class="form-control" placeholder="e.g. ஜமீன் பல்லாவரம், சென்னை">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="eventDescEn">Description (English)</label>
+            <textarea id="eventDescEn" class="form-control" placeholder="Full details of the pooja, participants and timings..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="eventDescTa">Description (Tamil)</label>
+            <textarea id="eventDescTa" class="form-control" placeholder="நிகழ்வின் முழு விவரங்கள்..."></textarea>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="eventDisplayOrder">Display Order</label>
+              <input type="number" id="eventDisplayOrder" class="form-control" value="0">
+            </div>
+            <div class="form-group" style="justify-content:center;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:20px;">
+                <input type="checkbox" id="eventPublished" checked style="width:16px;height:16px;">
+                <span>Published on Public Website</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-cancel-btn">Cancel</button>
+          <button type="submit" id="saveEventBtn" class="btn btn-primary">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT GALLERY ==================== -->
+  <div id="galleryModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="galleryModalTitle">Upload Gallery Photo</h3>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+      <form id="galleryForm">
+        <input type="hidden" id="galleryId">
+        <input type="hidden" id="galleryImagePath">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          
+          <div class="form-group">
+            <label>Image File (Upload to Supabase Storage)</label>
+            <div class="upload-dropzone" onclick="document.getElementById('galleryFileInput').click();">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="width:36px;height:36px;color:var(--admin-gold);margin-bottom:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div style="font-weight:600;font-size:13.5px;color:var(--admin-navy);">Click to select an image from your computer</div>
+              <small style="color:var(--admin-muted);">JPEG, PNG, WebP supported</small>
+              <input type="file" id="galleryFileInput" accept="image/*" style="display:none;">
+              <img id="galleryUploadPreview" class="upload-preview" alt="Preview">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="galleryImageUrl">Or Image URL <span class="hint">(e.g. existing assets/images/ path)</span></label>
+            <input type="text" id="galleryImageUrl" class="form-control" placeholder="assets/images/gallery-1.jpg">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="galleryTitleEn">Title (English) *</label>
+              <input type="text" id="galleryTitleEn" class="form-control" placeholder="e.g. Grand 18 Padi Altar" required>
+            </div>
+            <div class="form-group">
+              <label for="galleryTitleTa">Title (Tamil)</label>
+              <input type="text" id="galleryTitleTa" class="form-control" placeholder="e.g. புனித 18 படிகள் பீடம்">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="galleryCategory">Category *</label>
+              <select id="galleryCategory" class="form-control" required>
+                <option value="padi-pooja">18 Padi Pooja</option>
+                <option value="vilakku-pooja">Thiru Vilakku Pooja</option>
+                <option value="annadhaanam">Annadhaanam</option>
+                <option value="abhishekam">Maha Abhishekam</option>
+                <option value="utsavam">Mandala Pooja &amp; Utsavam</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="galleryBadgeEn">Category Badge Text (EN)</label>
+              <input type="text" id="galleryBadgeEn" class="form-control" placeholder="e.g. 18 Padi Pooja">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="galleryDescEn">Description (English)</label>
+            <textarea id="galleryDescEn" class="form-control" placeholder="Photo caption or description..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="galleryDescTa">Description (Tamil)</label>
+            <textarea id="galleryDescTa" class="form-control" placeholder="புகைப்பட விளக்கம்..."></textarea>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="galleryDisplayOrder">Display Order</label>
+              <input type="number" id="galleryDisplayOrder" class="form-control" value="0">
+            </div>
+            <div class="form-group" style="justify-content:center;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-top:20px;">
+                <input type="checkbox" id="galleryPublished" checked style="width:16px;height:16px;">
+                <span>Published in Media Gallery</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-cancel-btn">Cancel</button>
+          <button type="submit" id="saveGalleryBtn" class="btn btn-primary">Save Photo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT TRUSTEE ==================== -->
+  <div id="memberModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="memberModalTitle">Edit Member Profile</h3>
+        <button type="button" class="modal-close">&times;</button>
+      </div>
+      <form id="memberForm">
+        <input type="hidden" id="memberId">
+        <div class="modal-body" style="display:flex; flex-direction:column; gap:14px;">
+          
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="memberNameEn">Full Name (English) *</label>
+              <input type="text" id="memberNameEn" class="form-control" placeholder="e.g. Shri S Chandrasekaran" required>
+            </div>
+            <div class="form-group">
+              <label for="memberNameTa">Full Name (Tamil)</label>
+              <input type="text" id="memberNameTa" class="form-control" placeholder="e.g. திரு எஸ் சந்திரசேகரன்">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="memberRoleEn">Designation / Role (EN) *</label>
+              <input type="text" id="memberRoleEn" class="form-control" placeholder="e.g. Founder and President / Life Member" required>
+            </div>
+            <div class="form-group">
+              <label for="memberRoleTa">Designation / Role (TA)</label>
+              <input type="text" id="memberRoleTa" class="form-control" placeholder="e.g. தலைவர் / ஆயுள் உறுப்பினர்">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="memberGroupType">Committee Group *</label>
+              <select id="memberGroupType" class="form-control" required>
+                <option value="apex">Apex Committee</option>
+                <option value="present">Present Committee</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="memberInitials">Avatar Initials <span class="hint">(e.g. SC)</span></label>
+              <input type="text" id="memberInitials" class="form-control" placeholder="SC" maxlength="4">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="memberIdField">Profile Slug / ID <span class="hint">(used in trustee.html?id=...)</span></label>
+            <input type="text" id="memberIdField" class="form-control" placeholder="e.g. shri-s-chandrasekaran" required>
+          </div>
+
+          <div style="background:var(--admin-cream); border:1px solid var(--admin-line); border-radius:10px; padding:16px;">
+            <div style="font-weight:700; font-size:13px; color:var(--admin-maroon); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.04em;">Individual Profile Details (trustee.html)</div>
+            
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="memberFamily">Family Members</label>
+              <input type="text" id="memberFamily" class="form-control" placeholder="Names of family members...">
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="memberGothram">Gothram</label>
+                <input type="text" id="memberGothram" class="form-control" placeholder="e.g. Koushika">
+              </div>
+              <div class="form-group">
+                <label for="memberStar">Nakshatram / Star</label>
+                <input type="text" id="memberStar" class="form-control" placeholder="e.g. Uthirattathi">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:12px;">
+              <label for="memberRasi">Rasi</label>
+              <input type="text" id="memberRasi" class="form-control" placeholder="e.g. Meenam">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="memberFeatured" style="width:16px;height:16px;">
+                <span>Featured in Leadership (Apex Top Card)</span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="memberActive" checked style="width:16px;height:16px;">
+                <span>Active Member (Visible Publicly)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="memberDisplayOrder">Display Order</label>
+            <input type="number" id="memberDisplayOrder" class="form-control" value="0">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-cancel-btn">Cancel</button>
+          <button type="submit" id="saveMemberBtn" class="btn btn-primary">Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/trustees-data.js"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-client.js"></script>
+  <script src="assets/admin.js"></script>
+</body>
+</html>

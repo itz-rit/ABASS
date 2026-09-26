@@ -348,6 +348,7 @@ document.querySelectorAll('.obj-head').forEach(function(head){
 
   // Initialize gallery items
   collectItems();
+  window.collectLightboxItems = collectItems;
 })();
 
 // ============ HOMEPAGE HIGHLIGHTS SLIDER ============
@@ -473,6 +474,34 @@ document.querySelectorAll('.obj-head').forEach(function(head){
     padi:           { en:'Swamiye Saranam Ayyappa! I would like to sponsor the Yearly Padi Pooja (12 Dec 2026) at ABASS. Please share the details.', ta:'சுவாமியே சரணம் ஐயப்பா! ABASS-ல் ஆண்டு படி பூஜையை (12 டிச 2026) ஸ்பான்சர் செய்ய விரும்புகிறேன். விவரங்களைப் பகிரவும்.' },
     vilakku:        { en:'Swamiye Saranam Ayyappa! I would like to sponsor the Yearly Vilakku Pooja (19 Dec 2026) at ABASS. Please share the details.', ta:'சுவாமியே சரணம் ஐயப்பா! ABASS-ல் ஆண்டு விளக்கு பூஜையை (19 டிச 2026) ஸ்பான்சர் செய்ய விரும்புகிறேன். விவரங்களைப் பகிரவும்.' }
   };
+
+  // Dynamic Supabase sync for mobile quick sponsor bar
+  if (window.ABASS_API && window.ABASS_API.getEvents) {
+    window.ABASS_API.getEvents({ upcomingOnly: true }).then(function(res){
+      if(res && res.data && res.data.length > 0){
+        while(select.options.length > 2){ select.remove(2); }
+        res.data.forEach(function(e){
+          var opt = document.createElement('option');
+          var key = e.slug || e.id;
+          opt.value = key;
+          var enText = e.title_en + (e.date_display_en ? ' (' + e.date_display_en + ')' : '');
+          var taText = (e.title_ta || e.title_en) + (e.date_display_ta ? ' (' + e.date_display_ta + ')' : '');
+          opt.setAttribute('data-en', enText);
+          opt.setAttribute('data-ta', taText);
+          if (e.end_date || e.start_date) {
+            opt.setAttribute('data-until', e.end_date || e.start_date);
+          }
+          opt.textContent = (window.currentLang === 'ta') ? taText : enText;
+          select.appendChild(opt);
+
+          messages[key] = {
+            en: 'Swamiye Saranam Ayyappa! I would like to sponsor ' + e.title_en + ' (' + (e.date_display_en || '') + ') at ABASS. Please share the details.',
+            ta: 'சுவாமியே சரணம் ஐயப்பா! நான் ABASS-ல் ' + (e.title_ta || e.title_en) + ' (' + (e.date_display_ta || '') + ') ஸ்பான்சர் செய்ய விரும்புகிறேன். விவரங்களைப் பகிரவும்.'
+          };
+        });
+      }
+    }).catch(function(err){ console.warn('MQS sync error:', err); });
+  }
 
   btn.addEventListener('click', function(){
     var key = select.value;

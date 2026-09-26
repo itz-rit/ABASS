@@ -176,6 +176,7 @@
           <li><a href="transparency.html" data-en="Board of Trustees" data-ta="அறங்காவலர் குழு">Board of Trustees</a></li>
           <li><a href="transparency.html" data-en="Annual Reports" data-ta="ஆண்டு அறிக்கைகள்">Annual Reports</a></li>
           <li><a href="transparency.html" data-en="Compliance Updates" data-ta="இணக்க புதுப்பிப்புகள்">Compliance Updates</a></li>
+          <li><a href="admin.html" style="color:var(--gold); font-weight:600;" data-en="Admin Portal" data-ta="நிர்வாக போர்டல்">Admin Portal</a></li>
         </ul>
       </div>
     </div>
@@ -191,40 +192,70 @@
 </footer>
 
 <script src="assets/trustees-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase-config.js"></script>
+<script src="assets/supabase-client.js"></script>
 <script>
-(function(){
-  var data = window.ABASS_TRUSTEES || [];
+(async function(){
+  var leadEl = document.getElementById('apex-leadership-list');
+  var apexEl = document.getElementById('apex-committee-list');
+  var presentEl = document.getElementById('present-committee-list');
+
   function cardHTML(m, featured){
     var cls = 'trustee-card' + (featured ? ' trustee-card-lead' : '');
+    var nameEn = m.name_en || m.name || '';
+    var nameTa = m.name_ta || nameEn;
+    var roleEn = m.role_en || m.role || '';
+    var roleTa = m.role_ta || roleEn;
+    var initials = m.initials || (nameEn.split(' ').map(function(s){return s[0];}).join('').slice(0,3).toUpperCase());
+    var curLang = document.documentElement.lang || 'en';
+
     return '<div class="' + cls + '">' +
-        '<div class="avatar">' + m.initials + '</div>' +
+        '<div class="avatar">' + initials + '</div>' +
         '<div>' +
-          '<div class="role">' + m.role + '</div>' +
-          '<a class="name" href="trustee.html?id=' + encodeURIComponent(m.id) + '" style="text-decoration:none; color:inherit; cursor:pointer;">' + m.name + '</a>' +
+          '<div class="role" data-en="' + roleEn + '" data-ta="' + roleTa + '">' + (curLang === 'ta' ? roleTa : roleEn) + '</div>' +
+          '<a class="name" href="trustee.html?id=' + encodeURIComponent(m.id) + '" data-en="' + nameEn + '" data-ta="' + nameTa + '" style="text-decoration:none; color:inherit; cursor:pointer;">' + (curLang === 'ta' ? nameTa : nameEn) + '</a>' +
         '</div>' +
       '</div>';
   }
-  function render(containerId, group){
-    var el = document.getElementById(containerId);
-    if(!el) return;
-    var members = data.filter(function(m){ return m.group === group; });
-    members.forEach(function(m){
-      el.insertAdjacentHTML('beforeend', cardHTML(m, m.featured));
-    });
+
+  try {
+    var res = await window.ABASS_API.getMembers({ group: 'all' });
+    var members = (res && res.data && res.data.length > 0) ? res.data : (window.ABASS_TRUSTEES || []);
+
+    if(leadEl) leadEl.innerHTML = '';
+    if(apexEl) apexEl.innerHTML = '';
+    if(presentEl) presentEl.innerHTML = '';
+
+    var leadMembers = members.filter(function(m){ return (m.group === 'apex' || m.group_type === 'apex') && m.featured; });
+    var apexMembers = members.filter(function(m){ return (m.group === 'apex' || m.group_type === 'apex') && !m.featured; });
+    var presentMembers = members.filter(function(m){ return m.group === 'present' || m.group_type === 'present'; });
+
+    if(leadEl){
+      leadMembers.forEach(function(m){
+        leadEl.insertAdjacentHTML('beforeend', cardHTML(m, true));
+      });
+    }
+
+    if(apexEl){
+      apexMembers.forEach(function(m){
+        apexEl.insertAdjacentHTML('beforeend', cardHTML(m, false));
+      });
+    }
+
+    if(presentEl){
+      presentMembers.forEach(function(m){
+        presentEl.insertAdjacentHTML('beforeend', cardHTML(m, false));
+      });
+    }
+
+    // Refresh translation in case language was switched to Tamil
+    if (typeof window.applyLanguage === 'function') {
+      window.applyLanguage(document.documentElement.lang || 'en');
+    }
+  } catch (err) {
+    console.error('Error loading members:', err);
   }
-  var leadEl = document.getElementById('apex-leadership-list');
-  if(leadEl){
-    data.filter(function(m){ return m.group === 'apex' && m.featured; }).forEach(function(m){
-      leadEl.insertAdjacentHTML('beforeend', cardHTML(m, true));
-    });
-  }
-  var apexEl = document.getElementById('apex-committee-list');
-  if(apexEl){
-    data.filter(function(m){ return m.group === 'apex' && !m.featured; }).forEach(function(m){
-      apexEl.insertAdjacentHTML('beforeend', cardHTML(m, false));
-    });
-  }
-  render('present-committee-list', 'present');
 })();
 </script>
 <!-- MOBILE QUICK SPONSOR & DONATE BAR -->

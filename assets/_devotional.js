@@ -135,6 +135,30 @@
     detailBox.querySelector('.seva-detail-desc').textContent = pick(s, 'desc');
   }
 
+  /* ---- fetch live events from Supabase ---- */
+  if(window.ABASS_API && window.ABASS_API.getEvents){
+    window.ABASS_API.getEvents({ upcomingOnly: true }).then(function(res){
+      if(res && res.data && res.data.length > 0){
+        UPCOMING = res.data.map(function(e){
+          return {
+            id: e.slug || e.id,
+            en: e.title_en,
+            ta: e.title_ta || e.title_en,
+            whenEn: e.date_display_en || (e.is_recurring ? (e.recurrence_rule || 'Monthly') : (e.start_date + (e.end_date ? ' to ' + e.end_date : ''))),
+            whenTa: e.date_display_ta || e.date_display_en || '',
+            descEn: e.description_en || '',
+            descTa: e.description_ta || e.description_en || '',
+            until: e.end_date || e.start_date || null
+          };
+        });
+        buildOptions();
+        renderDetail();
+      }
+    }).catch(function(err){
+      console.warn('Seva Sankalpam Supabase sync error:', err);
+    });
+  }
+
   /* ---- show an on-page confirmation instead of sending via WhatsApp ---- */
   var thanksBox = form.querySelector('[data-seva-thanks]');
 
@@ -143,8 +167,6 @@
     var s = current();
     if(!s) return;
 
-    // Details are captured on the form for the Trustee to follow up on directly;
-    // nothing is sent automatically. Just confirm receipt to the devotee.
     if(thanksBox){
       thanksBox.hidden = false;
       thanksBox.scrollIntoView({ behavior:'smooth', block:'nearest' });
