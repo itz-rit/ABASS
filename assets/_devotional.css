@@ -264,8 +264,7 @@ body.lang-ta .seva-field > label{ text-transform:none; letter-spacing:.02em; fon
 }
 @keyframes sevaFade{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none;} }
 .seva-detail-top{
-  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
-  flex-wrap:wrap; margin-bottom:8px;
+  display:flex; flex-direction:column; align-items:stretch; gap:8px; margin-bottom:8px;
 }
 .seva-detail-name{
   font-family:'Cinzel',serif; font-size:16.5px; font-weight:700; color:var(--navy); line-height:1.3;
@@ -276,6 +275,14 @@ body.lang-ta .seva-detail-name{ font-family:'Noto Serif Tamil',serif; }
   background:var(--paper); border:1px solid var(--gold-soft); border-radius:999px;
   padding:4px 14px; white-space:nowrap;
 }
+.seva-detail-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
+.seva-detail-location{
+  display:inline-flex; align-items:center; gap:5px; min-width:0; max-width:100%;
+  color:var(--maroon); font-size:12.5px; font-weight:600; line-height:1.4;
+}
+.seva-detail-location[hidden]{ display:none; }
+.seva-detail-location svg{ width:14px; height:14px; flex:none; }
+.seva-detail-location-text{ min-width:0; overflow-wrap:anywhere; }
 .seva-detail-desc{ font-size:13.5px; color:var(--muted); line-height:1.6; }
 .seva-detail-perks{ margin-top:10px; display:grid; gap:6px; }
 .seva-detail-perks li{

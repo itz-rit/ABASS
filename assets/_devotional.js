@@ -58,6 +58,7 @@
       id:'annadhaanam',
       en:'Monthly Annadhaanam', ta:'மாதாந்திர அன்னதானம்',
       whenEn:'Every 2nd Saturday', whenTa:'ஒவ்வொரு மாத 2வது சனி',
+      locationEn:'Pallavaram, Chennai', locationTa:'பல்லாவரம், சென்னை',
       descEn:'Free meal offering for a minimum of 250 persons, held every Second Saturday of the month.',
       descTa:'ஒவ்வொரு மாத இரண்டாவது சனிக்கிழமையும் குறைந்தது 250 பேருக்கு இலவச அன்னதானம்.'
     },
@@ -66,6 +67,7 @@
       en:'Pallavaram Bharathi Nagar Pillayar Koil Kumbabhishekam Annadhaanam',
       ta:'பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகம் அன்னதானம்',
       whenEn:'27–30 Oct 2026', whenTa:'27–30 அக் 2026',
+      locationEn:'Pallavaram, Chennai', locationTa:'பல்லாவரம், சென்னை',
       descEn:'Annadhaanam in connection with the Kumbabhishekam at Bharathi Nagar Pillayar Koil, Pallavaram, from 27th to 30th October 2026.',
       descTa:'27 முதல் 30 அக்டோபர் 2026 வரை பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகத்தின் போது அன்னதானம்.'
     },
@@ -73,6 +75,7 @@
       id:'padi', until:'2026-12-12',
       en:'Yearly Padi Pooja', ta:'ஆண்டு படி பூஜை',
       whenEn:'12 Dec 2026', whenTa:'12 டிச 2026',
+      locationEn:'Zamin Pallavaram, Chennai', locationTa:'ஜமீன் பல்லாவரம், சென்னை',
       descEn:'Annual 18 Padi Pooja observed on 12th December 2026.',
       descTa:'12 டிசம்பர் 2026 அன்று ஆண்டு 18 படி பூஜை நடைபெறும்.'
     },
@@ -80,6 +83,7 @@
       id:'vilakku', until:'2026-12-19',
       en:'Yearly Vilakku Pooja', ta:'ஆண்டு விளக்கு பூஜை',
       whenEn:'19 Dec 2026', whenTa:'19 டிச 2026',
+      locationEn:'Zamin Pallavaram, Chennai', locationTa:'ஜமீன் பல்லாவரம், சென்னை',
       descEn:'Annual Thiru Vilakku Pooja observed on 19th December 2026.',
       descTa:'19 டிசம்பர் 2026 அன்று ஆண்டு திருவிளக்கு பூஜை நடைபெறும்.'
     }
@@ -100,6 +104,12 @@
 
   function isTa(){ return document.body.classList.contains('lang-ta'); }
   function pick(item, key){ return isTa() ? (item[key + 'Ta'] || item[key + 'En']) : item[key + 'En']; }
+  function displayLocation(item){
+    var location = pick(item, 'location');
+    if(!location) return '';
+    var parts = location.split(',').map(function(part){ return part.trim(); });
+    return parts.length > 2 ? parts.slice(-2).join(', ') : location;
+  }
   function current(){
     for(var i = 0; i < UPCOMING.length; i++){ if(UPCOMING[i].id === select.value) return UPCOMING[i]; }
     return UPCOMING[0];
@@ -118,7 +128,7 @@
     });
   }
 
-  /* ---- detail card: event name, date, description ---- */
+  /* ---- detail card: event name, date, location, description ---- */
   function renderDetail(){
     var s = current();
     if(!s){ detailBox.innerHTML = ''; return; }
@@ -126,12 +136,25 @@
     detailBox.innerHTML =
       '<div class="seva-detail-top">' +
         '<span class="seva-detail-name"></span>' +
-        '<span class="seva-detail-amt"></span>' +
+        '<div class="seva-detail-meta">' +
+          '<span class="seva-detail-amt"></span>' +
+          '<span class="seva-detail-location">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s7-7.2 7-13a7 7 0 1 0-14 0c0 5.8 7 13 7 13z"/><circle cx="12" cy="9" r="2.3"/></svg>' +
+            '<span class="seva-detail-location-text"></span>' +
+          '</span>' +
+        '</div>' +
       '</div>' +
       '<p class="seva-detail-desc"></p>';
 
     detailBox.querySelector('.seva-detail-name').textContent = isTa() ? s.ta : s.en;
     detailBox.querySelector('.seva-detail-amt').textContent  = pick(s, 'when');
+    var location = displayLocation(s);
+    var locationRow = detailBox.querySelector('.seva-detail-location');
+    if(location){
+      detailBox.querySelector('.seva-detail-location-text').textContent = location;
+    }else{
+      locationRow.hidden = true;
+    }
     detailBox.querySelector('.seva-detail-desc').textContent = pick(s, 'desc');
   }
 
@@ -146,6 +169,8 @@
             ta: e.title_ta || e.title_en,
             whenEn: e.date_display_en || (e.is_recurring ? (e.recurrence_rule || 'Monthly') : (e.start_date + (e.end_date ? ' to ' + e.end_date : ''))),
             whenTa: e.date_display_ta || e.date_display_en || '',
+            locationEn: e.location_en || '',
+            locationTa: e.location_ta || e.location_en || '',
             descEn: e.description_en || '',
             descTa: e.description_ta || e.description_en || '',
             until: e.end_date || e.start_date || null

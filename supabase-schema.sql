@@ -215,7 +215,7 @@ on conflict (slug) do update set
   display_order = excluded.display_order;
 
 insert into public.events (slug, title_en, title_ta, description_en, description_ta, start_date, end_date, date_display_en, date_display_ta, location_en, location_ta, is_recurring, recurrence_rule, published, display_order)
-values ('kumbabhishekam', 'Pallavaram Bharathi Nagar Pillayar Koil Kumbabhishekam Annadhaanam', 'பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகம் அன்னதானம்', 'Annadhaanam in connection with the Kumbabhishekam at Bharathi Nagar Pillayar Koil, Pallavaram, from 27th to 30th October 2026.', '27 முதல் 30 அக்டோபர் 2026 வரை பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகத்தின் போது அன்னதானம்.', '2026-10-27', '2026-10-30', '27–30 Oct 2026', '27–30 அக் 2026', 'Bharathi Nagar Pillayar Koil, Pallavaram, Chennai', 'பாரதி நகர் பிள்ளையார் கோவில், பல்லாவரம், சென்னை', false, NULL, true, 2)
+values ('kumbabhishekam', 'Pallavaram Bharathi Nagar Pillayar Koil Kumbabhishekam Annadhaanam', 'பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகம் அன்னதானம்', 'Annadhaanam in connection with the Kumbabhishekam at Bharathi Nagar Pillayar Koil, Pallavaram, from 27th to 30th October 2026.', '27 முதல் 30 அக்டோபர் 2026 வரை பல்லாவரம் பாரதி நகர் பிள்ளையார் கோவில் கும்பாபிஷேகத்தின் போது அன்னதானம்.', '2026-10-27', '2026-10-30', '27–30 Oct 2026', '27–30 அக் 2026', 'Pallavaram, Chennai', 'பல்லாவரம், சென்னை', false, NULL, true, 2)
 on conflict (slug) do update set
   title_en = excluded.title_en,
   title_ta = excluded.title_ta,

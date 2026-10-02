@@ -101,14 +101,13 @@
 
       <div class="trust-tabs-grid">
         <div>
-          <h3 style="font-size:16px; color:var(--maroon); margin-bottom:14px;" data-en="Leadership" data-ta="தலைமை">Leadership</h3>
-          <div class="trustee-list trustee-list-lead" id="apex-leadership-list"></div>
-
-          <h3 style="font-size:16px; color:var(--maroon); margin:28px 0 14px;" data-en="Apex Committee" data-ta="உச்ச குழு">Apex Committee</h3>
-          <div class="trustee-list" id="apex-committee-list"></div>
-
-          <h3 style="font-size:16px; color:var(--maroon); margin:32px 0 14px;" data-en="Present Committee" data-ta="தற்போதைய குழு">Present Committee</h3>
-          <div class="trustee-list" id="present-committee-list"></div>
+          <div class="trustee-role-tabs" role="group" aria-label="Trustee role filters">
+            <button type="button" class="trustee-role-tab" aria-pressed="false" data-role-filter="president" data-en="President / Founder" data-ta="தலைவர் / நிறுவனர்">President / Founder</button>
+            <button type="button" class="trustee-role-tab" aria-pressed="false" data-role-filter="secretary" data-en="Secretary" data-ta="செயலாளர்">Secretary</button>
+            <button type="button" class="trustee-role-tab" aria-pressed="false" data-role-filter="life-member" data-en="Life Member" data-ta="வாழ்நாள் உறுப்பினர்">Life Member</button>
+            <button type="button" class="trustee-role-tab" aria-pressed="false" data-role-filter="member" data-en="Member" data-ta="உறுப்பினர்">Member</button>
+          </div>
+          <div class="trustee-list trustee-filter-list" id="transparency-trustee-list" aria-live="polite" hidden></div>
           <p class="form-note" style="margin-top:14px;" data-en="Click on a member's name for their profile page. Family details, Gothram, Star and Rasi will be added by the ABASS admin." data-ta="ஒரு உறுப்பினரின் பெயரைக் கிளிக் செய்து அவரது சுயவிவரப் பக்கத்தைக் காணலாம். குடும்ப விவரங்கள், கோத்திரம், நட்சத்திரம் மற்றும் ராசி ABASS நிர்வாகியால் சேர்க்கப்படும்.">Click on a member's name for their profile page. Family details, Gothram, Star and Rasi will be added by the ABASS admin.</p>
         </div>
 
@@ -196,66 +195,85 @@
 <script src="assets/supabase-config.js"></script>
 <script src="assets/supabase-client.js"></script>
 <script>
-(async function(){
-  var leadEl = document.getElementById('apex-leadership-list');
-  var apexEl = document.getElementById('apex-committee-list');
-  var presentEl = document.getElementById('present-committee-list');
+(function(){
+  var list = document.getElementById('transparency-trustee-list');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-role-filter]'));
+  var members = window.ABASS_TRUSTEES || [];
+  var selectedRole = null;
 
-  function cardHTML(m, featured){
-    var cls = 'trustee-card' + (featured ? ' trustee-card-lead' : '');
-    var nameEn = m.name_en || m.name || '';
-    var nameTa = m.name_ta || nameEn;
-    var roleEn = m.role_en || m.role || '';
-    var roleTa = m.role_ta || roleEn;
-    var initials = m.initials || (nameEn.split(' ').map(function(s){return s[0];}).join('').slice(0,3).toUpperCase());
-    var curLang = document.documentElement.lang || 'en';
+  if(!list || !tabs.length) return;
 
-    return '<div class="' + cls + '">' +
-        '<div class="avatar">' + initials + '</div>' +
-        '<div>' +
-          '<div class="role" data-en="' + roleEn + '" data-ta="' + roleTa + '">' + (curLang === 'ta' ? roleTa : roleEn) + '</div>' +
-          '<a class="name" href="trustee.html?id=' + encodeURIComponent(m.id) + '" data-en="' + nameEn + '" data-ta="' + nameTa + '" style="text-decoration:none; color:inherit; cursor:pointer;">' + (curLang === 'ta' ? nameTa : nameEn) + '</a>' +
-        '</div>' +
-      '</div>';
+  function roleOf(member){ return member.role_en || member.role || ''; }
+  function groupOf(member){ return member.group || member.group_type || ''; }
+
+  function matchesRole(member, role){
+    var designation = roleOf(member).toLowerCase();
+    if(role === 'president') return designation.indexOf('founder and president') !== -1;
+    if(role === 'secretary') return designation.indexOf('secretary') !== -1;
+    if(role === 'life-member') return designation.indexOf('life member') !== -1;
+    return role === 'member' && designation.trim() === 'member' && groupOf(member) === 'present';
   }
 
-  try {
-    var res = await window.ABASS_API.getMembers({ group: 'all' });
-    var members = (res && res.data && res.data.length > 0) ? res.data : (window.ABASS_TRUSTEES || []);
+  function renderCard(member){
+    var nameEn = member.name_en || member.name || '';
+    var nameTa = member.name_ta || nameEn;
+    var roleEn = roleOf(member);
+    var roleTa = member.role_ta || roleEn;
+    var card = document.createElement('article');
+    var avatar = document.createElement('div');
+    var content = document.createElement('div');
+    var role = document.createElement('div');
+    var name = document.createElement('a');
 
-    if(leadEl) leadEl.innerHTML = '';
-    if(apexEl) apexEl.innerHTML = '';
-    if(presentEl) presentEl.innerHTML = '';
+    card.className = 'trustee-card' + (member.featured ? ' trustee-card-lead' : '');
+    avatar.className = 'avatar';
+    avatar.textContent = member.initials || nameEn.split(/\s+/).map(function(part){ return part.charAt(0); }).join('').slice(0, 3).toUpperCase();
+    role.className = 'role';
+    role.setAttribute('data-en', roleEn);
+    role.setAttribute('data-ta', roleTa);
+    role.textContent = document.documentElement.lang === 'ta' ? roleTa : roleEn;
+    name.className = 'name';
+    name.href = 'trustee.html?id=' + encodeURIComponent(member.id);
+    name.setAttribute('data-en', nameEn);
+    name.setAttribute('data-ta', nameTa);
+    name.textContent = document.documentElement.lang === 'ta' ? nameTa : nameEn;
+    name.style.textDecoration = 'none';
+    name.style.color = 'inherit';
+    name.style.cursor = 'pointer';
 
-    var leadMembers = members.filter(function(m){ return (m.group === 'apex' || m.group_type === 'apex') && m.featured; });
-    var apexMembers = members.filter(function(m){ return (m.group === 'apex' || m.group_type === 'apex') && !m.featured; });
-    var presentMembers = members.filter(function(m){ return m.group === 'present' || m.group_type === 'present'; });
-
-    if(leadEl){
-      leadMembers.forEach(function(m){
-        leadEl.insertAdjacentHTML('beforeend', cardHTML(m, true));
-      });
-    }
-
-    if(apexEl){
-      apexMembers.forEach(function(m){
-        apexEl.insertAdjacentHTML('beforeend', cardHTML(m, false));
-      });
-    }
-
-    if(presentEl){
-      presentMembers.forEach(function(m){
-        presentEl.insertAdjacentHTML('beforeend', cardHTML(m, false));
-      });
-    }
-
-    // Refresh translation in case language was switched to Tamil
-    if (typeof window.applyLanguage === 'function') {
-      window.applyLanguage(document.documentElement.lang || 'en');
-    }
-  } catch (err) {
-    console.error('Error loading members:', err);
+    content.appendChild(role);
+    content.appendChild(name);
+    card.appendChild(avatar);
+    card.appendChild(content);
+    list.appendChild(card);
   }
+
+  function render(){
+    list.replaceChildren();
+    list.hidden = !selectedRole;
+    tabs.forEach(function(tab){
+      var active = tab.getAttribute('data-role-filter') === selectedRole;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    var seen = Object.create(null);
+    members.filter(function(member){
+      if(!matchesRole(member, selectedRole) || seen[member.id]) return false;
+      seen[member.id] = true;
+      return true;
+    }).forEach(renderCard);
+  }
+
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var clickedRole = tab.getAttribute('data-role-filter');
+      selectedRole = clickedRole === selectedRole ? null : clickedRole;
+      render();
+    });
+  });
+
+  render();
 })();
 </script>
 <!-- MOBILE QUICK SPONSOR & DONATE BAR -->
