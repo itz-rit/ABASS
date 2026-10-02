@@ -110,7 +110,10 @@
     var resetView = document.getElementById('resetPasswordView');
     if (resetView) resetView.style.display = 'none';
     document.getElementById('adminShell').style.display = 'flex';
-    document.getElementById('adminUserEmail').textContent = state.user ? state.user.email : '';
+    var emailStr = state.user ? state.user.email : '';
+    document.getElementById('adminUserEmail').textContent = emailStr;
+    var mobileEmail = document.getElementById('adminUserEmailMobile');
+    if (mobileEmail) mobileEmail.textContent = emailStr;
     switchTab('dashboard');
     loadAllData();
   }
@@ -342,7 +345,7 @@
   // --- TAB NAVIGATION ---
   function switchTab(tabName) {
     state.activeTab = tabName;
-    document.querySelectorAll('.admin-tab-btn').forEach(function (btn) {
+    document.querySelectorAll('.admin-tab-btn, .admin-mobile-tab-btn').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
     });
     document.querySelectorAll('.view-section').forEach(function (sec) {
@@ -365,8 +368,13 @@
       var eRes = await client.from('events').select('*').order('display_order', { ascending: true });
       if (!eRes.error && eRes.data) {
         state.events = eRes.data;
-        document.getElementById('statEventsCount').textContent = state.events.filter(function (e) { return e.published; }).length;
-        document.getElementById('badgeEventsCount').textContent = state.events.length;
+        var pubEvents = state.events.filter(function (e) { return e.published; }).length;
+        var elEvents = document.getElementById('statEventsCount');
+        if (elEvents) elEvents.textContent = pubEvents;
+        var bEvents = document.getElementById('badgeEventsCount');
+        if (bEvents) bEvents.textContent = state.events.length;
+        var bEventsMob = document.getElementById('badgeEventsCountMobile');
+        if (bEventsMob) bEventsMob.textContent = state.events.length;
       }
     } catch (err) { console.error('Events load error:', err); }
 
@@ -375,8 +383,13 @@
       var gRes = await client.from('gallery_items').select('*').order('display_order', { ascending: true });
       if (!gRes.error && gRes.data) {
         state.gallery = gRes.data;
-        document.getElementById('statGalleryCount').textContent = state.gallery.filter(function (g) { return g.published; }).length;
-        document.getElementById('badgeGalleryCount').textContent = state.gallery.length;
+        var pubGal = state.gallery.filter(function (g) { return g.published; }).length;
+        var elGal = document.getElementById('statGalleryCount');
+        if (elGal) elGal.textContent = pubGal;
+        var bGal = document.getElementById('badgeGalleryCount');
+        if (bGal) bGal.textContent = state.gallery.length;
+        var bGalMob = document.getElementById('badgeGalleryCountMobile');
+        if (bGalMob) bGalMob.textContent = state.gallery.length;
       }
     } catch (err) { console.error('Gallery load error:', err); }
 
@@ -385,8 +398,13 @@
       var mRes = await client.from('members').select('*').order('display_order', { ascending: true });
       if (!mRes.error && mRes.data) {
         state.members = mRes.data;
-        document.getElementById('statTrusteesCount').textContent = state.members.filter(function (m) { return m.active; }).length;
-        document.getElementById('badgeTrusteesCount').textContent = state.members.length;
+        var actMembers = state.members.filter(function (m) { return m.active; }).length;
+        var elTr = document.getElementById('statTrusteesCount');
+        if (elTr) elTr.textContent = actMembers;
+        var bTr = document.getElementById('badgeTrusteesCount');
+        if (bTr) bTr.textContent = state.members.length;
+        var bTrMob = document.getElementById('badgeTrusteesCountMobile');
+        if (bTrMob) bTrMob.textContent = state.members.length;
       }
     } catch (err) { console.error('Trustees load error:', err); }
 
@@ -416,12 +434,12 @@
       var statusText = e.published ? 'Published' : 'Draft';
 
       tr.innerHTML =
-        '<td><strong>' + escapeHtml(e.title_en) + '</strong><br><small style="color:var(--admin-muted);">' + escapeHtml(e.title_ta || '') + '</small></td>' +
-        '<td>' + (e.is_recurring ? '<span class="status-pill active" style="margin-right:6px;">Recurring</span>' : '') + escapeHtml(dateText) + '</td>' +
-        '<td><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;margin-right:4px;vertical-align:-1px;color:var(--admin-maroon);"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>' + escapeHtml(locText) + '</td>' +
-        '<td><span class="status-pill ' + statusClass + '">' + statusText + '</span></td>' +
-        '<td>' + (e.display_order || 0) + '</td>' +
-        '<td><div class="row-actions">' +
+        '<td data-label="Event Title"><strong>' + escapeHtml(e.title_en) + '</strong><br><small style="color:var(--admin-muted);">' + escapeHtml(e.title_ta || '') + '</small></td>' +
+        '<td data-label="Schedule">' + (e.is_recurring ? '<span class="status-pill active" style="margin-right:6px;">Recurring</span>' : '') + escapeHtml(dateText) + '</td>' +
+        '<td data-label="Location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;margin-right:4px;vertical-align:-1px;color:var(--admin-maroon);"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>' + escapeHtml(locText) + '</td>' +
+        '<td data-label="Status"><span class="status-pill ' + statusClass + '">' + statusText + '</span></td>' +
+        '<td data-label="Order">' + (e.display_order || 0) + '</td>' +
+        '<td data-label="Actions"><div class="row-actions">' +
           '<button type="button" class="btn btn-outline btn-sm edit-event-btn" data-id="' + e.id + '">Edit</button>' +
           '<button type="button" class="btn btn-danger btn-sm delete-event-btn" data-id="' + e.id + '">Delete</button>' +
         '</div></td>';
@@ -815,15 +833,15 @@
       var groupLabel = m.group_type === 'apex' ? 'Apex Committee' : 'Present Committee';
 
       tr.innerHTML =
-        '<td><div style="display:flex;align-items:center;gap:10px;">' +
+        '<td data-label="Member Name"><div style="display:flex;align-items:center;gap:10px;">' +
           '<div style="width:34px;height:34px;border-radius:50%;background:var(--admin-maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:\'Cinzel\',serif;flex:none;">' + escapeHtml(m.initials || 'AB') + '</div>' +
           '<div><strong>' + escapeHtml(m.name_en) + '</strong>' + (m.featured ? ' <span class="status-pill active" style="font-size:10px;">Lead</span>' : '') + '<br><small style="color:var(--admin-muted);">' + escapeHtml(m.name_ta || '') + '</small></div>' +
         '</div></td>' +
-        '<td>' + escapeHtml(m.role_en) + '</td>' +
-        '<td><span class="status-pill ' + (m.group_type === 'apex' ? 'published' : 'draft') + '">' + groupLabel + '</span></td>' +
-        '<td><span class="status-pill ' + statusClass + '">' + statusText + '</span></td>' +
-        '<td>' + (m.gothram ? '<span title="' + escapeHtml(m.gothram) + '">G: ' + escapeHtml(m.gothram) + '</span><br>' : '') + (m.rasi ? 'R: ' + escapeHtml(m.rasi) : (m.family_members ? 'Has Family' : '—')) + '</td>' +
-        '<td><div class="row-actions">' +
+        '<td data-label="Designation">' + escapeHtml(m.role_en) + '</td>' +
+        '<td data-label="Committee Group"><span class="status-pill ' + (m.group_type === 'apex' ? 'published' : 'draft') + '">' + groupLabel + '</span></td>' +
+        '<td data-label="Status"><span class="status-pill ' + statusClass + '">' + statusText + '</span></td>' +
+        '<td data-label="Gothram / Rasi">' + (m.gothram ? '<span title="' + escapeHtml(m.gothram) + '">G: ' + escapeHtml(m.gothram) + '</span><br>' : '') + (m.rasi ? 'R: ' + escapeHtml(m.rasi) : (m.family_members ? 'Has Family' : '—')) + '</td>' +
+        '<td data-label="Actions"><div class="row-actions">' +
           '<button type="button" class="btn btn-outline btn-sm edit-member-btn" data-id="' + m.id + '">Edit</button>' +
           '<button type="button" class="btn btn-danger btn-sm remove-member-btn" data-id="' + m.id + '">Remove</button>' +
         '</div></td>';
@@ -1052,12 +1070,46 @@
       });
     }
 
-    // Tab buttons
+    // Tab buttons (desktop)
     document.querySelectorAll('.admin-tab-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         switchTab(btn.getAttribute('data-tab'));
       });
     });
+
+    // Mobile navigation drawer toggle
+    var menuToggle = document.getElementById('adminMenuToggle');
+    var mobileDrawer = document.getElementById('adminMobileDrawer');
+    if (menuToggle && mobileDrawer) {
+      menuToggle.addEventListener('click', function () {
+        var isOpen = mobileDrawer.classList.toggle('open');
+        menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        var ham = menuToggle.querySelector('.hamburger-icon');
+        var cls = menuToggle.querySelector('.close-icon');
+        if (ham) ham.style.display = isOpen ? 'none' : 'block';
+        if (cls) cls.style.display = isOpen ? 'block' : 'none';
+      });
+    }
+
+    // Mobile drawer tab buttons
+    document.querySelectorAll('.admin-mobile-tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        switchTab(btn.getAttribute('data-tab'));
+        if (mobileDrawer) {
+          mobileDrawer.classList.remove('open');
+          if (menuToggle) {
+            menuToggle.setAttribute('aria-expanded', 'false');
+            var ham = menuToggle.querySelector('.hamburger-icon');
+            var cls = menuToggle.querySelector('.close-icon');
+            if (ham) ham.style.display = 'block';
+            if (cls) cls.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    var logoutBtnMob = document.getElementById('logoutBtnMobile');
+    if (logoutBtnMob) logoutBtnMob.addEventListener('click', handleLogout);
 
     // Modals
     var addEventBtn = document.getElementById('addEventBtn');

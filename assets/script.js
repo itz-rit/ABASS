@@ -97,11 +97,23 @@ document.querySelectorAll('.obj-head').forEach(function(head){
   var toggle=document.querySelector('.nav-toggle');
   var nav=document.querySelector('.main-nav');
   if(!toggle || !nav) return;
-  toggle.addEventListener('click',function(){
+  toggle.addEventListener('click',function(e){
+    e.stopPropagation();
     var open=document.body.classList.toggle('mobile-nav-open');
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  nav.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){document.body.classList.remove('mobile-nav-open');});});
+  nav.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      document.body.classList.remove('mobile-nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(document.body.classList.contains('mobile-nav-open') && !nav.contains(e.target) && !toggle.contains(e.target)){
+      document.body.classList.remove('mobile-nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
 })();
 
 // ============ ACTIVE PAGE NAV ============

@@ -425,11 +425,16 @@ section[id]{ scroll-margin-top:92px; }
 .qr-placeholder{ max-width:100%; }
 
 /* the chant marquee must never contribute to page width */
-.saranam-strip{ max-width:100vw; overflow:hidden; }
+.saranam-strip{ max-width:100%; width:100%; overflow:hidden; }
 
 @media (max-width: 480px){
   .contribution-form-wrap{ padding:20px 16px; }
   .contribution-grid{ gap:24px; }
+}
+
+@media (max-width: 360px){
+  .hero-visual-badge{ max-width:min(96%, 270px); padding:6px 10px; }
+  .hero-visual-badge .lbl{ font-size:7.8px !important; }
 }
 
 
